@@ -20,32 +20,20 @@ else
     warn("Your exploit does not support setfpscap.")
 end
 
--- Load WindUI v6
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+-- Load Luna
+local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua", true))()
 
-local Window = WindUI:CreateWindow({
-    Title = "Legitxwx Hub | v1.1.0",
-    Icon = "door-open",
-    Author = "by xwx",
-    Folder = "LegitxwxHub",
-    Theme = "Dark",
-    Size = UDim2.fromOffset(580, 460),
-    MinSize = Vector2.new(560, 350),
-    MaxSize = Vector2.new(850, 560),
-})
-
-Window:EditOpenButton({
-    Title = "Open",
-    Icon = "monitor",
-    CornerRadius = UDim.new(0,16),
-    StrokeThickness = 2,
-    Color = ColorSequence.new(
-        Color3.fromHex("FF0F7B"), 
-        Color3.fromHex("F89B29")
-    ),
-    OnlyMobile = false,
-    Enabled = true,
-    Draggable = true,
+local Window = Luna:CreateWindow({
+	Name = "Legitxwx Hub",
+	Subtitle = "v1.1.0",
+	LogoID = nil,
+	LoadingEnabled = true,
+	LoadingTitle = "Legitxwx Hub",
+	LoadingSubtitle = "by xwx",
+	ConfigSettings = {
+		ConfigFolder = "LegitxwxHub"
+	},
+	KeySystem = false
 })
 
 -- Services & Player
@@ -83,166 +71,201 @@ LocalPlayer.Idled:Connect(function()
 end)
 
 -- 🌟 Gears Tab
-local gearTab = Window:Tab({Title = "🌟 Gears", Icon = "tool"})
-gearTab:Paragraph({Title = "Gear Shop", Desc = "Select gears and choose how to buy them."})
-
-local gearDropdown = gearTab:Dropdown({
-    Title = "Select Gears",
-    Values = gearList,
-    Multi = true,
-    AllowNone = true,
-    Callback = function(option) selectedGears = option end
+local gearTab = Window:CreateTab({
+	Name = "🌟 Gears",
+	Icon = "tool",
+	ShowTitle = true
 })
 
-local gearInput = gearTab:Input({
-    Title = "Gear Buy Delay (seconds)",
-    Value = "1",
-    Callback = function(input) 
-        local num = tonumber(input)
-        if num and num > 0 then gearDelay = num end
-    end
+gearTab:CreateDivider()
+gearTab:CreateParagraph({
+	Title = "Gear Shop",
+	Text = "Select gears and choose how to buy them."
 })
 
-local autoSelectedGearsToggle = gearTab:Toggle({
-    Title = "Auto Buy Selected Gears",
-    Default = false,
-    Callback = function(state)
-        autoBuyGears = state
-        task.spawn(function()
-            while autoBuyGears do
-                for _, gear in ipairs(selectedGears) do
-                    if not autoBuyGears then break end
-                    buyGear(gear)
-                    task.wait(gearDelay)
-                end
-                task.wait(3)
-            end
-        end)
-    end
-})
+local gearDropdown = gearTab:CreateDropdown({
+	Name = "Select Gears",
+	Options = gearList,
+	CurrentOption = {},
+	MultipleOptions = true,
+	Callback = function(options)
+		selectedGears = options
+	end
+}, "SelectedGears")
 
-local autoAllGearsToggle = gearTab:Toggle({
-    Title = "Auto Buy ALL Gears",
-    Default = false,
-    Callback = function(state)
-        autoBuyAllGears = state
-        task.spawn(function()
-            while autoBuyAllGears do
-                for _, gear in ipairs(gearList) do
-                    if not autoBuyAllGears then break end
-                    buyGear(gear)
-                    task.wait(gearDelay)
-                end
-                task.wait(3)
-            end
-        end)
-    end
-})
+local gearDelayInput = gearTab:CreateInput({
+	Name = "Gear Buy Delay",
+	PlaceholderText = "Enter delay in seconds",
+	CurrentValue = tostring(gearDelay),
+	Numeric = true,
+	Enter = true,
+	Callback = function(text)
+		local num = tonumber(text)
+		if num and num > 0 then
+			gearDelay = num
+		end
+	end
+}, "GearDelay")
+
+local autoSelectedGearsToggle = gearTab:CreateToggle({
+	Name = "Auto Buy Selected Gears",
+	CurrentValue = false,
+	Callback = function(state)
+		autoBuyGears = state
+		task.spawn(function()
+			while autoBuyGears do
+				for _, gear in ipairs(selectedGears) do
+					if not autoBuyGears then break end
+					buyGear(gear)
+					task.wait(gearDelay)
+				end
+				task.wait(3)
+			end
+		end)
+	end
+}, "AutoBuySelectedGears")
+
+local autoAllGearsToggle = gearTab:CreateToggle({
+	Name = "Auto Buy ALL Gears",
+	CurrentValue = false,
+	Callback = function(state)
+		autoBuyAllGears = state
+		task.spawn(function()
+			while autoBuyAllGears do
+				for _, gear in ipairs(gearList) do
+					if not autoBuyAllGears then break end
+					buyGear(gear)
+					task.wait(gearDelay)
+				end
+				task.wait(3)
+			end
+		end)
+	end
+}, "AutoBuyAllGears")
 
 -- 🌱 Seeds Tab
-local seedTab = Window:Tab({Title = "🌱 Seeds", Icon = "leaf"})
-seedTab:Paragraph({Title = "Seed Shop", Desc = "Select seeds and choose how to buy them."})
-
-local seedDropdown = seedTab:Dropdown({
-    Title = "Select Seeds",
-    Values = seedList,
-    Multi = true,
-    AllowNone = true,
-    Callback = function(option) selectedSeeds = option end
+local seedTab = Window:CreateTab({
+	Name = "🌱 Seeds",
+	Icon = "leaf",
+	ShowTitle = true
 })
 
-local seedInput = seedTab:Input({
-    Title = "Seed Buy Delay (seconds)",
-    Value = "1",
-    Callback = function(input)
-        local num = tonumber(input)
-        if num and num > 0 then seedDelay = num end
-    end
+seedTab:CreateDivider()
+seedTab:CreateParagraph({
+	Title = "Seed Shop",
+	Text = "Select seeds and choose how to buy them."
 })
 
-local autoSelectedSeedsToggle = seedTab:Toggle({
-    Title = "Auto Buy Selected Seeds",
-    Default = false,
-    Callback = function(state)
-        autoBuySeeds = state
-        task.spawn(function()
-            while autoBuySeeds do
-                for _, seed in ipairs(selectedSeeds) do
-                    if not autoBuySeeds then break end
-                    buySeed(seed)
-                    task.wait(seedDelay)
-                end
-                task.wait(3)
-            end
-        end)
-    end
-})
+local seedDropdown = seedTab:CreateDropdown({
+	Name = "Select Seeds",
+	Options = seedList,
+	CurrentOption = {},
+	MultipleOptions = true,
+	Callback = function(options)
+		selectedSeeds = options
+	end
+}, "SelectedSeeds")
 
-local autoAllSeedsToggle = seedTab:Toggle({
-    Title = "Auto Buy ALL Seeds",
-    Default = false,
-    Callback = function(state)
-        autoBuyAllSeeds = state
-        task.spawn(function()
-            while autoBuyAllSeeds do
-                for _, seed in ipairs(seedList) do
-                    if not autoBuyAllSeeds then break end
-                    buySeed(seed)
-                    task.wait(seedDelay)
-                end
-                task.wait(3)
-            end
-        end)
-    end
-})
+local seedDelayInput = seedTab:CreateInput({
+	Name = "Seed Buy Delay",
+	PlaceholderText = "Enter delay in seconds",
+	CurrentValue = tostring(seedDelay),
+	Numeric = true,
+	Enter = true,
+	Callback = function(text)
+		local num = tonumber(text)
+		if num and num > 0 then
+			seedDelay = num
+		end
+	end
+}, "SeedDelay")
+
+local autoSelectedSeedsToggle = seedTab:CreateToggle({
+	Name = "Auto Buy Selected Seeds",
+	CurrentValue = false,
+	Callback = function(state)
+		autoBuySeeds = state
+		task.spawn(function()
+			while autoBuySeeds do
+				for _, seed in ipairs(selectedSeeds) do
+					if not autoBuySeeds then break end
+					buySeed(seed)
+					task.wait(seedDelay)
+				end
+				task.wait(3)
+			end
+		end)
+	end
+}, "AutoBuySelectedSeeds")
+
+local autoAllSeedsToggle = seedTab:CreateToggle({
+	Name = "Auto Buy ALL Seeds",
+	CurrentValue = false,
+	Callback = function(state)
+		autoBuyAllSeeds = state
+		task.spawn(function()
+			while autoBuyAllSeeds do
+				for _, seed in ipairs(seedList) do
+					if not autoBuyAllSeeds then break end
+					buySeed(seed)
+					task.wait(seedDelay)
+				end
+				task.wait(3)
+			end
+		end)
+	end
+}, "AutoBuyAllSeeds")
 
 -- 🧠 Brainrots Tab
-local brainTab = Window:Tab({Title = "🧠 Brainrots", Icon = "brain"})
-brainTab:Paragraph({Title = "Brainrot Auto", Desc = "Equip the best brainrot automatically or manually."})
-
-brainTab:Button({Title = "Equip Best Brainrot", Callback = function() equipBestBrainrot() end})
-
-local brainInput = brainTab:Input({
-    Title = "Auto Collect Delay (seconds)",
-    Value = "60",
-    Callback = function(input)
-        local num = tonumber(input)
-        if num and num > 0 then autoBrainrotDelay = num end
-    end
+local brainTab = Window:CreateTab({
+	Name = "🧠 Brainrots",
+	Icon = "brain",
+	ShowTitle = true
 })
 
-local autoBestBrainrotToggle = brainTab:Toggle({
-    Title = "Auto Equip Best Brainrot",
-    Default = false,
-    Callback = function(state)
-        autoBestBrainrot = state
-        task.spawn(function()
-            while autoBestBrainrot do
-                equipBestBrainrot()
-                task.wait(autoBrainrotDelay)
-            end
-        end)
-    end
+brainTab:CreateDivider()
+brainTab:CreateParagraph({
+	Title = "Brainrot Auto",
+	Text = "Equip the best brainrot automatically or manually."
 })
 
--- ⚙️ Config Tab
-local configTab = Window:Tab({Title = "⚙️ Config", Icon = "gear"})
-local ConfigManager = Window.ConfigManager
-local myConfig = ConfigManager:CreateConfig("LegitxwxHub_Config")
+brainTab:CreateButton({
+	Name = "Equip Best Brainrot",
+	Description = nil,
+	Callback = function()
+		equipBestBrainrot()
+	end
+})
 
--- Register all **Elements** (this is the correct way!)
-myConfig:Register("SelectedGears", gearDropdown)
-myConfig:Register("GearDelay", gearInput)
-myConfig:Register("AutoBuySelectedGears", autoSelectedGearsToggle)
-myConfig:Register("AutoBuyAllGears", autoAllGearsToggle)
+local autoBrainrotInput = brainTab:CreateInput({
+	Name = "Auto Equip Delay",
+	PlaceholderText = "Enter delay in seconds",
+	CurrentValue = tostring(autoBrainrotDelay),
+	Numeric = true,
+	Enter = true,
+	Callback = function(text)
+		local num = tonumber(text)
+		if num and num > 0 then
+			autoBrainrotDelay = num
+		end
+	end
+}, "AutoBrainrotDelay")
 
-myConfig:Register("SelectedSeeds", seedDropdown)
-myConfig:Register("SeedDelay", seedInput)
-myConfig:Register("AutoBuySelectedSeeds", autoSelectedSeedsToggle)
-myConfig:Register("AutoBuyAllSeeds", autoAllSeedsToggle)
+local autoBestBrainrotToggle = brainTab:CreateToggle({
+	Name = "Auto Equip Best Brainrot",
+	CurrentValue = false,
+	Callback = function(state)
+		autoBestBrainrot = state
+		task.spawn(function()
+			while autoBestBrainrot do
+				equipBestBrainrot()
+				task.wait(autoBrainrotDelay)
+			end
+		end)
+	end
+}, "AutoEquipBestBrainrot")
 
-myConfig:Register("AutoBestBrainrotDelay", brainInput)
-myConfig:Register("AutoEquipBestBrainrot", autoBestBrainrotToggle)
-
--- Load saved config on start
-myConfig:Load()
+-- ⚙️ Config Section
+gearTab:BuildConfigSection()
+seedTab:BuildConfigSection()
+brainTab:BuildConfigSection()
