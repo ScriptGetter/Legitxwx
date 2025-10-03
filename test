@@ -23,6 +23,7 @@ end
 -- Load Luna
 local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua", true))()
 
+-- Window
 local Window = Luna:CreateWindow({
 	Name = "Legitxwx Hub",
 	Subtitle = "v1.1.0",
@@ -34,6 +35,13 @@ local Window = Luna:CreateWindow({
 		ConfigFolder = "LegitxwxHub"
 	},
 	KeySystem = false
+})
+
+-- Home Tab
+Window:CreateHomeTab({
+	SupportedExecutors = {"Synapse X", "Krnl", "ProtoSmasher"},
+	DiscordInvite = "9e9V648aGq",
+	Icon = 1
 })
 
 -- Services & Player
@@ -66,8 +74,8 @@ local function equipBestBrainrot() pcall(function() EquipBestBrainrotRemote:Fire
 -- Anti-AFK
 local VirtualUser = game:GetService("VirtualUser")
 LocalPlayer.Idled:Connect(function()
-    VirtualUser:CaptureController()
-    VirtualUser:ClickButton2(Vector2.new())
+	VirtualUser:CaptureController()
+	VirtualUser:ClickButton2(Vector2.new())
 end)
 
 -- 🌟 Gears Tab
@@ -88,9 +96,7 @@ local gearDropdown = gearTab:CreateDropdown({
 	Options = gearList,
 	CurrentOption = {},
 	MultipleOptions = true,
-	Callback = function(options)
-		selectedGears = options
-	end
+	Callback = function(options) selectedGears = options end
 }, "SelectedGears")
 
 local gearDelayInput = gearTab:CreateInput({
@@ -101,9 +107,7 @@ local gearDelayInput = gearTab:CreateInput({
 	Enter = true,
 	Callback = function(text)
 		local num = tonumber(text)
-		if num and num > 0 then
-			gearDelay = num
-		end
+		if num and num > 0 then gearDelay = num end
 	end
 }, "GearDelay")
 
@@ -143,6 +147,8 @@ local autoAllGearsToggle = gearTab:CreateToggle({
 	end
 }, "AutoBuyAllGears")
 
+gearTab:BuildConfigSection()
+
 -- 🌱 Seeds Tab
 local seedTab = Window:CreateTab({
 	Name = "🌱 Seeds",
@@ -161,9 +167,7 @@ local seedDropdown = seedTab:CreateDropdown({
 	Options = seedList,
 	CurrentOption = {},
 	MultipleOptions = true,
-	Callback = function(options)
-		selectedSeeds = options
-	end
+	Callback = function(options) selectedSeeds = options end
 }, "SelectedSeeds")
 
 local seedDelayInput = seedTab:CreateInput({
@@ -174,9 +178,7 @@ local seedDelayInput = seedTab:CreateInput({
 	Enter = true,
 	Callback = function(text)
 		local num = tonumber(text)
-		if num and num > 0 then
-			seedDelay = num
-		end
+		if num and num > 0 then seedDelay = num end
 	end
 }, "SeedDelay")
 
@@ -216,6 +218,8 @@ local autoAllSeedsToggle = seedTab:CreateToggle({
 	end
 }, "AutoBuyAllSeeds")
 
+seedTab:BuildConfigSection()
+
 -- 🧠 Brainrots Tab
 local brainTab = Window:CreateTab({
 	Name = "🧠 Brainrots",
@@ -232,9 +236,7 @@ brainTab:CreateParagraph({
 brainTab:CreateButton({
 	Name = "Equip Best Brainrot",
 	Description = nil,
-	Callback = function()
-		equipBestBrainrot()
-	end
+	Callback = function() equipBestBrainrot() end
 })
 
 local autoBrainrotInput = brainTab:CreateInput({
@@ -245,9 +247,7 @@ local autoBrainrotInput = brainTab:CreateInput({
 	Enter = true,
 	Callback = function(text)
 		local num = tonumber(text)
-		if num and num > 0 then
-			autoBrainrotDelay = num
-		end
+		if num and num > 0 then autoBrainrotDelay = num end
 	end
 }, "AutoBrainrotDelay")
 
@@ -265,7 +265,4 @@ local autoBestBrainrotToggle = brainTab:CreateToggle({
 	end
 }, "AutoEquipBestBrainrot")
 
--- ⚙️ Config Section
-gearTab:BuildConfigSection()
-seedTab:BuildConfigSection()
 brainTab:BuildConfigSection()
