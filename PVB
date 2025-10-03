@@ -11,13 +11,6 @@ local Window = Luna:CreateWindow({
     KeySystem = false
 })
 
--- Create Home Tab first
-Window:CreateHomeTab({
-    SupportedExecutors = {},
-    DiscordInvite = "9e9V648aGq",
-    Icon = 1
-})
-
 -- Now create other tabs
 local gearTab = Window:CreateTab({Name = "🌟 Gears", Icon = "tool"})
 local seedTab = Window:CreateTab({Name = "🌱 Seeds", Icon = "leaf"})
