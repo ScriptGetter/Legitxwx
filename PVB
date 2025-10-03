@@ -1,26 +1,77 @@
 local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua"))()
 
 local Window = Luna:CreateWindow({
-    Name = "Legitxwx Hub | v1.1.0",
-    Subtitle = "Plants vs Brainrots",
-    LogoID = "82795327169782",
-    LoadingEnabled = true,
-    LoadingTitle = "Legitxwx Hub",
-    LoadingSubtitle = "by xwx",
-    ConfigSettings = {ConfigFolder = "LegitxwxHub"},
-    KeySystem = false
+	Name = "Legitxwx Hub | v1.1.0",
+	Subtitle = "Plants vs Brainrots",
+	LogoID = "82795327169782",
+	LoadingEnabled = true,
+	LoadingTitle = "Legitxwx Hub",
+	LoadingSubtitle = "by xwx",
+	ConfigSettings = {ConfigFolder = "LegitxwxHub"},
+	KeySystem = false
 })
 
--- Now create other tabs
-local gearTab = Window:CreateTab({Name = "🌟 Gears", Icon = "tool"})
-local seedTab = Window:CreateTab({Name = "🌱 Seeds", Icon = "leaf"})
-local brainTab = Window:CreateTab({Name = "🧠 Brainrots", Icon = "brain"})
-local localTab = Window:CreateTab({Name = "🧍 Local", Icon = "user"})
-local updTab   = Window:CreateTab({Name = "UPD LOG", Icon = "scroll"})
+-- Create Home Tab FIRST
+Window:CreateHomeTab({
+	SupportedExecutors = {},
+	DiscordInvite = "9e9V648aGq",
+	Icon = 1
+})
 
--- Example: add a paragraph to test
-gearTab:CreateParagraph({Title = "Test Tab", Text = "If you see this, tabs are working!"})
-seedTab:CreateParagraph({Title = "Test Tab", Text = "Seed Tab works!"})
-brainTab:CreateParagraph({Title = "Test Tab", Text = "Brainrots Tab works!"})
-localTab:CreateParagraph({Title = "Test Tab", Text = "Local Tab works!"})
-updTab:CreateParagraph({Title = "Test Tab", Text = "Update Log Tab works!"})
+-- 🌟 Gears Tab
+local gearTab = Window:CreateTab({Name = "🌟 Gears", Icon = "tool"})
+gearTab:CreateParagraph({Title = "Gear Shop", Text = "Select gears and toggles will work here."})
+local gearToggle = gearTab:CreateToggle({
+	Name = "Auto Buy Gears",
+	CurrentValue = false,
+	Callback = function(state)
+		print("Auto Buy Gears:", state)
+	end
+})
+gearTab:BuildConfigSection()
+
+-- 🌱 Seeds Tab
+local seedTab = Window:CreateTab({Name = "🌱 Seeds", Icon = "leaf"})
+seedTab:CreateParagraph({Title = "Seed Shop", Text = "Select seeds and toggles will work here."})
+local seedToggle = seedTab:CreateToggle({
+	Name = "Auto Buy Seeds",
+	CurrentValue = false,
+	Callback = function(state)
+		print("Auto Buy Seeds:", state)
+	end
+})
+seedTab:BuildConfigSection()
+
+-- 🧠 Brainrots Tab
+local brainTab = Window:CreateTab({Name = "🧠 Brainrots", Icon = "brain"})
+brainTab:CreateParagraph({Title = "Brainrots", Text = "Auto Equip Brainrots"})
+local brainToggle = brainTab:CreateToggle({
+	Name = "Auto Equip Brainrots",
+	CurrentValue = false,
+	Callback = function(state)
+		print("Auto Equip Brainrots:", state)
+	end
+})
+brainTab:BuildConfigSection()
+
+-- 🧍 Local Tab
+local localTab = Window:CreateTab({Name = "🧍 Local", Icon = "user"})
+localTab:CreateParagraph({Title = "Player Info", Text = "Username: "..game.Players.LocalPlayer.Name})
+localTab:CreateButton({
+	Name = "Copy Discord",
+	Callback = function()
+		if setclipboard then setclipboard("https://dsc.gg/9e9V648aGq") end
+	end
+})
+localTab:BuildConfigSection()
+
+-- 📜 Update Log Tab
+local updTab = Window:CreateTab({Name = "UPD LOG", Icon = "scroll"})
+updTab:CreateParagraph({Title = "Update Log", Text = [[
+v1.1.0:
+- Fixed tabs showing
+- Full config saving
+- Local tab working
+- FPS unlock notification
+]]})
+updTab:BuildConfigSection()
