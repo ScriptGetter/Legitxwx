@@ -248,8 +248,9 @@ localTab:Button({
     end
 })
 
--- Config
-local ConfigManager = Window.ConfigManager
-local PvBConfig = ConfigManager:CreateConfig("PvB")
-PvBConfig:Save()
-PvBConfig:Load()
+local UPD = Window:Tab({Title = "UPD LOG", Icon = "user"})
+
+local Code = UPD:Code({
+    Title = "UPD LOG",
+    Code = [[Script Fixing On-Going!]]
+})
