@@ -23,7 +23,7 @@ end
 local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua", true))()
 
 local Window = Luna:CreateWindow({
-	Name = "Legitxwx Hub | v1.1.0",
+	Name = "Legitxwx Hub | v1.1.f0",
 	Subtitle = "Plants vs Brainrots Automation",
 	LogoID = "82795327169782",
 	LoadingEnabled = true,
