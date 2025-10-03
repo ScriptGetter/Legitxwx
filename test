@@ -1,25 +1,5 @@
 repeat task.wait() until game:IsLoaded()
 
--- FPS Unlock
-if setfpscap then
-    setfpscap(1000000)
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "dsc.gg/9e9V648aGq",
-        Text = "FPS Unlocked!",
-        Duration = 2,
-        Button1 = "Okay"
-    })
-    warn("FPS Unlocked!")
-else
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "dsc.gg/9e9V648aGq",
-        Text = "Your exploit does not support setfpscap.",
-        Duration = 2,
-        Button1 = "Okay"
-    })
-    warn("Your exploit does not support setfpscap.")
-end
-
 -- Load Luna
 local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua", true))()
 
@@ -31,62 +11,57 @@ local Window = Luna:CreateWindow({
 	LoadingEnabled = true,
 	LoadingTitle = "Legitxwx Hub",
 	LoadingSubtitle = "by xwx",
-	ConfigSettings = {
-		ConfigFolder = "LegitxwxHub"
-	},
+	ConfigSettings = { ConfigFolder = "LegitxwxHub" },
 	KeySystem = false
 })
 
--- Home Tab
+-- Home tab (MUST be created first)
 Window:CreateHomeTab({
 	SupportedExecutors = {"Synapse X", "Krnl", "ProtoSmasher"},
 	DiscordInvite = "9e9V648aGq",
 	Icon = 1
 })
 
--- Services & Player
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+-- Config Manager
+local ConfigManager = Window.ConfigManager
+local myConfig = ConfigManager:CreateConfig("LegitxwxConfig")
 
--- Remotes
-local Remotes = ReplicatedStorage:WaitForChild("Remotes")
-local BuyGearRemote = Remotes:WaitForChild("BuyGear")
-local BuyItemRemote = Remotes:WaitForChild("BuyItem")
-local EquipBestBrainrotRemote = Remotes:WaitForChild("EquipBestBrainrots")
-
--- Lists
-local gearList = {"Water Bucket","Frost Grenade","Banana Gun","Frost Blower","Carrot Launcher"}
-local seedList = {"Cactus Seed","Strawberry Seed","Pumpkin Seed","Sunflower Seed","Dragon Seed","Eggplant Seed","Watermelon Seed","Grape Seed","Cocotank Seed","Carnivorous Plant Seed","Mr Carrot Seed","Tomatrio Seed","Shroombino Seed"}
-
--- Variables
-local selectedGears, selectedSeeds = {}, {}
-local autoBuyGears, autoBuySeeds = false, false
-local autoBuyAllGears, autoBuyAllSeeds = false, false
-local gearDelay, seedDelay = 1, 1
-local autoBestBrainrot, autoBrainrotDelay = false, 60
-
--- Functions
-local function buyGear(item) pcall(function() BuyGearRemote:FireServer(item) end) end
-local function buySeed(item) pcall(function() BuyItemRemote:FireServer(item) end) end
-local function equipBestBrainrot() pcall(function() EquipBestBrainrotRemote:FireServer() end) end
-
--- Anti-AFK
-local VirtualUser = game:GetService("VirtualUser")
-LocalPlayer.Idled:Connect(function()
-	VirtualUser:CaptureController()
-	VirtualUser:ClickButton2(Vector2.new())
-end)
-
--- 🌟 Gears Tab
+-- Delay to ensure Luna initializes completely
 task.defer(function()
+    -- Services & Player
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+
+    local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+    local BuyGearRemote = Remotes:WaitForChild("BuyGear")
+    local BuyItemRemote = Remotes:WaitForChild("BuyItem")
+    local EquipBestBrainrotRemote = Remotes:WaitForChild("EquipBestBrainrots")
+
+    local gearList = {"Water Bucket","Frost Grenade","Banana Gun","Frost Blower","Carrot Launcher"}
+    local seedList = {"Cactus Seed","Strawberry Seed","Pumpkin Seed","Sunflower Seed","Dragon Seed","Eggplant Seed","Watermelon Seed","Grape Seed","Cocotank Seed","Carnivorous Plant Seed","Mr Carrot Seed","Tomatrio Seed","Shroombino Seed"}
+
+    local selectedGears, selectedSeeds = {}, {}
+    local autoBuyGears, autoBuySeeds = false, false
+    local autoBuyAllGears, autoBuyAllSeeds = false, false
+    local gearDelay, seedDelay = 1, 1
+    local autoBestBrainrot, autoBrainrotDelay = false, 60
+
+    -- Functions
+    local function buyGear(item) pcall(function() BuyGearRemote:FireServer(item) end) end
+    local function buySeed(item) pcall(function() BuyItemRemote:FireServer(item) end) end
+    local function equipBestBrainrot() pcall(function() EquipBestBrainrotRemote:FireServer() end) end
+
+    -- Anti-AFK
+    local VirtualUser = game:GetService("VirtualUser")
+    LocalPlayer.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end)
+
+    -- 🌟 Gears Tab
     local gearTab = Window:CreateTab({Name = "🌟 Gears", Icon = "tool", ShowTitle = true})
-    
-    gearTab:CreateParagraph({
-        Title = "Gear Shop",
-        Text = "Select gears and choose how to buy them."
-    })
-    
+
     local gearDropdown = gearTab:CreateDropdown({
         Name = "Select Gears",
         Options = gearList,
@@ -94,7 +69,7 @@ task.defer(function()
         MultipleOptions = true,
         Callback = function(options) selectedGears = options end
     }, "SelectedGears")
-    
+
     local gearDelayInput = gearTab:CreateInput({
         Name = "Gear Buy Delay",
         PlaceholderText = "Enter delay in seconds",
@@ -106,8 +81,8 @@ task.defer(function()
             if num and num > 0 then gearDelay = num end
         end
     }, "GearDelay")
-    
-    local autoSelectedGearsToggle = gearTab:CreateToggle({
+
+    local autoBuySelectedGearsToggle = gearTab:CreateToggle({
         Name = "Auto Buy Selected Gears",
         CurrentValue = false,
         Callback = function(state)
@@ -124,8 +99,8 @@ task.defer(function()
             end)
         end
     }, "AutoBuySelectedGears")
-    
-    local autoAllGearsToggle = gearTab:CreateToggle({
+
+    local autoBuyAllGearsToggle = gearTab:CreateToggle({
         Name = "Auto Buy ALL Gears",
         CurrentValue = false,
         Callback = function(state)
@@ -142,17 +117,16 @@ task.defer(function()
             end)
         end
     }, "AutoBuyAllGears")
-end)
 
--- 🌱 Seeds Tab
-task.defer(function()
+    -- Register elements for config
+    myConfig:Register("SelectedGears", gearDropdown)
+    myConfig:Register("GearDelay", gearDelayInput)
+    myConfig:Register("AutoBuySelectedGears", autoBuySelectedGearsToggle)
+    myConfig:Register("AutoBuyAllGears", autoBuyAllGearsToggle)
+
+    -- 🌱 Seeds Tab
     local seedTab = Window:CreateTab({Name = "🌱 Seeds", Icon = "leaf", ShowTitle = true})
-    
-    seedTab:CreateParagraph({
-        Title = "Seed Shop",
-        Text = "Select seeds and choose how to buy them."
-    })
-    
+
     local seedDropdown = seedTab:CreateDropdown({
         Name = "Select Seeds",
         Options = seedList,
@@ -160,7 +134,7 @@ task.defer(function()
         MultipleOptions = true,
         Callback = function(options) selectedSeeds = options end
     }, "SelectedSeeds")
-    
+
     local seedDelayInput = seedTab:CreateInput({
         Name = "Seed Buy Delay",
         PlaceholderText = "Enter delay in seconds",
@@ -172,8 +146,8 @@ task.defer(function()
             if num and num > 0 then seedDelay = num end
         end
     }, "SeedDelay")
-    
-    local autoSelectedSeedsToggle = seedTab:CreateToggle({
+
+    local autoBuySelectedSeedsToggle = seedTab:CreateToggle({
         Name = "Auto Buy Selected Seeds",
         CurrentValue = false,
         Callback = function(state)
@@ -190,8 +164,8 @@ task.defer(function()
             end)
         end
     }, "AutoBuySelectedSeeds")
-    
-    local autoAllSeedsToggle = seedTab:CreateToggle({
+
+    local autoBuyAllSeedsToggle = seedTab:CreateToggle({
         Name = "Auto Buy ALL Seeds",
         CurrentValue = false,
         Callback = function(state)
@@ -208,23 +182,21 @@ task.defer(function()
             end)
         end
     }, "AutoBuyAllSeeds")
-end)
 
--- 🧠 Brainrots Tab
-task.defer(function()
+    -- Register elements for config
+    myConfig:Register("SelectedSeeds", seedDropdown)
+    myConfig:Register("SeedDelay", seedDelayInput)
+    myConfig:Register("AutoBuySelectedSeeds", autoBuySelectedSeedsToggle)
+    myConfig:Register("AutoBuyAllSeeds", autoBuyAllSeedsToggle)
+
+    -- 🧠 Brainrots Tab
     local brainTab = Window:CreateTab({Name = "🧠 Brainrots", Icon = "brain", ShowTitle = true})
-    
-    brainTab:CreateParagraph({
-        Title = "Brainrot Auto",
-        Text = "Equip the best brainrot automatically or manually."
-    })
-    
-    brainTab:CreateButton({
+
+    local equipButton = brainTab:CreateButton({
         Name = "Equip Best Brainrot",
-        Description = nil,
         Callback = function() equipBestBrainrot() end
     })
-    
+
     local autoBrainrotInput = brainTab:CreateInput({
         Name = "Auto Equip Delay",
         PlaceholderText = "Enter delay in seconds",
@@ -236,8 +208,8 @@ task.defer(function()
             if num and num > 0 then autoBrainrotDelay = num end
         end
     }, "AutoBrainrotDelay")
-    
-    local autoBestBrainrotToggle = brainTab:CreateToggle({
+
+    local autoEquipBrainrotToggle = brainTab:CreateToggle({
         Name = "Auto Equip Best Brainrot",
         CurrentValue = false,
         Callback = function(state)
@@ -250,4 +222,12 @@ task.defer(function()
             end)
         end
     }, "AutoEquipBestBrainrot")
+
+    -- Register brainrot elements for config
+    myConfig:Register("AutoBrainrotDelay", autoBrainrotInput)
+    myConfig:Register("AutoEquipBestBrainrot", autoEquipBrainrotToggle)
+
+    -- Save & load example
+    myConfig:Save()
+    myConfig:Load()
 end)
