@@ -227,11 +227,10 @@ local autoBestBrainrotToggle = brainTab:Toggle({
 
 -- ⚙️ Config Tab
 local configTab = Window:Tab({Title = "⚙️ Config", Icon = "gear"})
-
 local ConfigManager = Window.ConfigManager
 local myConfig = ConfigManager:CreateConfig("LegitxwxHub_Config")
 
--- Register the **actual Elements**, not raw variables
+-- Register all **Elements** (this is the correct way!)
 myConfig:Register("SelectedGears", gearDropdown)
 myConfig:Register("GearDelay", gearInput)
 myConfig:Register("AutoBuySelectedGears", autoSelectedGearsToggle)
@@ -245,5 +244,5 @@ myConfig:Register("AutoBuyAllSeeds", autoAllSeedsToggle)
 myConfig:Register("AutoBestBrainrotDelay", brainInput)
 myConfig:Register("AutoEquipBestBrainrot", autoBestBrainrotToggle)
 
--- Load saved config on script start
+-- Load saved config on start
 myConfig:Load()
