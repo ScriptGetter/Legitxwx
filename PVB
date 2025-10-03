@@ -1,419 +1,269 @@
--- Legitxwx Hub v1.1.0 (Robust executor-friendly startup)
--- Put this in your executor and run
+-- Legitxwx Hub | Luna Version with Full Config
+repeat task.wait() until game:IsLoaded()
 
-local function notify(title, text, dur)
-    pcall(function()
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = title or "Legitxwx",
-            Text = text or "",
-            Duration = dur or 3
-        })
-    end)
+-- FPS Unlock
+if setfpscap then
+    setfpscap(1000000)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Legitxwx Hub",
+        Text = "FPS Unlocked!",
+        Duration = 2
+    })
+    warn("FPS Unlocked!")
+else
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Legitxwx Hub",
+        Text = "Your exploit does not support setfpscap.",
+        Duration = 2
+    })
+    warn("Your exploit does not support setfpscap.")
 end
 
-local function safe_print(...)
-    pcall(print, ...)
-end
+-- Load Luna UI
+local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua", true))()
 
--- safe http get that tries common exploit methods and multiple URLs
-local function http_get(url)
-    local ok, res
-    -- try game:HttpGet
-    ok, res = pcall(function() return (game.HttpGet and game:HttpGet(url)) or (HttpGet and HttpGet(url)) end)
-    if ok and res and #res > 0 then return res end
+local Window = Luna:CreateWindow({
+	Name = "Legitxwx Hub | v1.1.0",
+	Subtitle = "Plants vs Brainrots Automation",
+	LogoID = "82795327169782",
+	LoadingEnabled = true,
+	LoadingTitle = "Legitxwx Hub",
+	LoadingSubtitle = "by xwx",
+	ConfigSettings = {ConfigFolder = "LegitxwxHub"},
+	KeySystem = false
+})
 
-    -- try HttpService
-    local HttpService = game:GetService("HttpService")
-    ok, res = pcall(function() return HttpService:GetAsync(url) end)
-    if ok and res and #res > 0 then return res end
+-- Services & Player
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
+local VirtualUser = game:GetService("VirtualUser")
+local LocalPlayer = Players.LocalPlayer
 
-    -- try syn.request style
-    if syn and syn.request then
-        ok, res = pcall(function()
-            local r = syn.request({Url = url, Method = "GET"})
-            return r.Body
-        end)
-        if ok and res and #res > 0 then return res end
-    end
+-- Anti-AFK
+LocalPlayer.Idled:Connect(function()
+	VirtualUser:CaptureController()
+	VirtualUser:ClickButton2(Vector2.new())
+end)
 
-    -- try request (older exploits)
-    if request then
-        ok, res = pcall(function()
-            local r = request({Url = url, Method = "GET"})
-            return r.Body
-        end)
-        if ok and res and #res > 0 then return res end
-    end
+-- Remotes
+local RemotesParent = ReplicatedStorage:FindFirstChild("Remotes")
+local BuyGearRemote = RemotesParent and RemotesParent:FindFirstChild("BuyGear")
+local BuyItemRemote = RemotesParent and RemotesParent:FindFirstChild("BuyItem")
+local EquipBestBrainrotRemote = RemotesParent and RemotesParent:FindFirstChild("EquipBestBrainrots")
 
-    return nil, "http_get failed for " .. tostring(url)
-end
+-- Lists
+local gearList = {"Water Bucket","Frost Grenade","Banana Gun","Frost Blower","Carrot Launcher"}
+local seedList = {"Cactus Seed","Strawberry Seed","Pumpkin Seed","Sunflower Seed","Dragon Seed","Eggplant Seed","Watermelon Seed","Grape Seed","Cocotank Seed","Carnivorous Plant Seed","Mr Carrot Seed","Tomatrio Seed","Shroombino Seed"}
 
--- wrapper to try multiple windui URLs
-local function load_windui()
-    local urls = {
-        "https://raw.githubusercontent.com/Footagesus/WindUI/main/main.lua", -- raw master
-        "https://github.com/Footagesus/WindUI/releases/latest/download/main.lua", -- releases
-    }
+-- Variables
+local selectedGears, selectedSeeds = {}, {}
+local autoBuyGears, autoBuySeeds = false, false
+local autoBuyAllGears, autoBuyAllSeeds = false, false
+local gearDelay, seedDelay = 1, 1
+local autoBestBrainrot, autoBrainrotDelay = false, 60
 
-    for _, url in ipairs(urls) do
-        local body, err = http_get(url)
-        if body then
-            local ok, f = pcall(loadstring, body)
-            if ok and type(f) == "function" then
-                local ok2, ret = pcall(f)
-                if ok2 and ret then
-                    return ret
-                elseif ok2 and not ret then
-                    -- some libs return a table directly
-                    return f()
-                else
-                    -- if the executed chunk errored, continue to next url
-                    safe_print("WindUI execution error:", ret)
-                end
-            else
-                safe_print("loadstring failed for", url, f)
-            end
-        else
-            safe_print("http_get failed for", url, err)
-        end
-    end
-    return nil, "Could not load WindUI from known URLs."
-end
-
--- safe setclipboard (tries multiple executor APIs)
+-- Helper Functions
+local function buyGear(item) if BuyGearRemote then pcall(function() BuyGearRemote:FireServer(item) end) end end
+local function buySeed(item) if BuyItemRemote then pcall(function() BuyItemRemote:FireServer(item) end) end end
+local function equipBestBrainrot() if EquipBestBrainrotRemote then pcall(function() EquipBestBrainrotRemote:FireServer() end) end end
 local function safe_set_clipboard(text)
-    if not text then return false, "no text" end
-    local tries = {
-        function() return setclipboard(text) end,
-        function() return (syn and syn.set_clipboard and syn.set_clipboard(text)) end,
-        function() return (write_clipboard and write_clipboard(text)) end,
-        function() return (clipboard and clipboard.set and clipboard.set(text)) end,
-    }
-    for _, fn in ipairs(tries) do
-        local ok, res = pcall(fn)
-        if ok then return true end
-    end
-    return false, "no clipboard method available"
+	if setclipboard then pcall(function() setclipboard(text) end)
+	elseif syn and syn.set_clipboard then pcall(function() syn.set_clipboard(text) end)
+	else return false end
+	return true
 end
 
--- top-level protected run so user sees errors
-local function main()
-    repeat task.wait() until game:IsLoaded()
+-- 🌟 Gears Tab
+local gearTab = Window:CreateTab({Name = "🌟 Gears", Icon = "tool"})
+gearTab:CreateDivider()
+gearTab:CreateParagraph({Title = "Gear Shop", Text = "Select gears and choose how to buy them."})
 
-    -- Services
-    local Players = game:GetService("Players")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local StarterGui = game:GetService("StarterGui")
-    local VirtualUser = game:GetService("VirtualUser")
+local gearDropdown = gearTab:CreateDropdown({
+	Name = "Select Gears",
+	Options = gearList,
+	MultipleOptions = true,
+	Callback = function(options) selectedGears = options end
+})
 
-    local LocalPlayer = Players.LocalPlayer
+local gearInput = gearTab:CreateInput({
+	Name = "Gear Buy Delay (seconds)",
+	PlaceholderText = tostring(gearDelay),
+	Callback = function(value)
+		local num = tonumber(value)
+		if num and num > 0 then gearDelay = num end
+	end
+})
 
-    -- FPS unlock with executor-safe check
-    if type(setfpscap) == "function" or (syn and syn.set_thread_identity) or (setfflag) then
-        pcall(function() if setfpscap then setfpscap(1000) end end)
-        notify("Legitxwx Hub", "FPS unlock attempted.", 2)
-    else
-        notify("Legitxwx Hub", "setfpscap not supported by this executor.", 2)
-    end
+local gearToggle = gearTab:CreateToggle({
+	Name = "Auto Buy Selected Gears",
+	CurrentValue = autoBuyGears,
+	Callback = function(state)
+		autoBuyGears = state
+		task.spawn(function()
+			while autoBuyGears do
+				for _, gear in ipairs(selectedGears) do
+					if not autoBuyGears then break end
+					buyGear(gear)
+					task.wait(gearDelay)
+				end
+				task.wait(0.25)
+			end
+		end)
+	end
+})
 
-    -- load WindUI (with fallback)
-    local WindUI, err = load_windui()
-    if not WindUI then
-        notify("Legitxwx Hub", "Failed to load WindUI. Check console.", 6)
-        safe_print("WindUI load error:", err)
-        return
-    end
+local gearAllToggle = gearTab:CreateToggle({
+	Name = "Auto Buy ALL Gears",
+	CurrentValue = autoBuyAllGears,
+	Callback = function(state)
+		autoBuyAllGears = state
+		task.spawn(function()
+			while autoBuyAllGears do
+				for _, gear in ipairs(gearList) do
+					if not autoBuyAllGears then break end
+					buyGear(gear)
+					task.wait(gearDelay)
+				end
+				task.wait(0.25)
+			end
+		end)
+	end
+})
 
-    local Window = WindUI:CreateWindow({
-        Title = "Legitxwx Hub | v1.1.0",
-        Icon = "door-open",
-        Author = "by xwx",
-        Folder = "LegitxwxHub",
-        Theme = "Dark",
-        Size = UDim2.fromOffset(580, 460),
-        MinSize = Vector2.new(560, 350),
-        MaxSize = Vector2.new(850, 560),
-    })
+-- 🌱 Seeds Tab
+local seedTab = Window:CreateTab({Name = "🌱 Seeds", Icon = "leaf"})
+seedTab:CreateDivider()
+seedTab:CreateParagraph({Title = "Seed Shop", Text = "Select seeds and choose how to buy them."})
 
-    -- Wait for remotes but do it defensively (timeout)
-    local function waitForRemote(pathParts, timeout)
-        timeout = timeout or 8
-        local start = tick()
-        local node = game
-        for i, part in ipairs(pathParts) do
-            while tick() - start < timeout and not node:FindFirstChild(part) do
-                task.wait(0.15)
-            end
-            if not node:FindFirstChild(part) then
-                return nil, ("Missing %s in path"):format(part)
-            end
-            node = node:FindFirstChild(part)
-        end
-        return node
-    end
+local seedDropdown = seedTab:CreateDropdown({
+	Name = "Select Seeds",
+	Options = seedList,
+	MultipleOptions = true,
+	Callback = function(options) selectedSeeds = options end
+})
 
-    local remotesRoot, e1 = waitForRemote({"ReplicatedStorage"}, 3)
-    -- Actually we want Remotes under ReplicatedStorage - try common path
-    local RemotesParent = nil
-    if ReplicatedStorage:FindFirstChild("Remotes") then
-        RemotesParent = ReplicatedStorage:FindFirstChild("Remotes")
-    else
-        -- try "RemoteEvents" or "Remote" or direct names
-        for _, name in ipairs({"Remotes", "RemoteEvents", "Remote"}) do
-            if ReplicatedStorage:FindFirstChild(name) then
-                RemotesParent = ReplicatedStorage:FindFirstChild(name)
-                break
-            end
-        end
-    end
+local seedInput = seedTab:CreateInput({
+	Name = "Seed Buy Delay (seconds)",
+	PlaceholderText = tostring(seedDelay),
+	Callback = function(value)
+		local num = tonumber(value)
+		if num and num > 0 then seedDelay = num end
+	end
+})
 
-    if not RemotesParent then
-        notify("Legitxwx Hub", "Cannot find Remotes folder in ReplicatedStorage. Script will still load UI but remotes will error if used.", 6)
-        safe_print("Remotes folder not found in ReplicatedStorage.")
-    end
+local seedToggle = seedTab:CreateToggle({
+	Name = "Auto Buy Selected Seeds",
+	CurrentValue = autoBuySeeds,
+	Callback = function(state)
+		autoBuySeeds = state
+		task.spawn(function()
+			while autoBuySeeds do
+				for _, seed in ipairs(selectedSeeds) do
+					if not autoBuySeeds then break end
+					buySeed(seed)
+					task.wait(seedDelay)
+				end
+				task.wait(0.25)
+			end
+		end)
+	end
+})
 
-    -- try to grab individual remotes safely
-    local function try_get_remote(name)
-        if RemotesParent and RemotesParent:FindFirstChild(name) then
-            return RemotesParent:FindFirstChild(name)
-        else
-            safe_print("Remote not found:", name)
-            return nil
-        end
-    end
+local seedAllToggle = seedTab:CreateToggle({
+	Name = "Auto Buy ALL Seeds",
+	CurrentValue = autoBuyAllSeeds,
+	Callback = function(state)
+		autoBuyAllSeeds = state
+		task.spawn(function()
+			while autoBuyAllSeeds do
+				for _, seed in ipairs(seedList) do
+					if not autoBuyAllSeeds then break end
+					buySeed(seed)
+					task.wait(seedDelay)
+				end
+				task.wait(0.25)
+			end
+		end)
+	end
+})
 
-    local BuyGearRemote = try_get_remote("BuyGear")
-    local BuyItemRemote = try_get_remote("BuyItem")
-    local EquipBestBrainrotRemote = try_get_remote("EquipBestBrainrots")
+-- 🧠 Brainrots Tab
+local brainTab = Window:CreateTab({Name = "🧠 Brainrots", Icon = "brain"})
+brainTab:CreateDivider()
+brainTab:CreateParagraph({Title = "Brainrot Auto", Text = "Equip the best brainrot automatically or manually."})
 
-    -- Lists and variables
-    local gearList = {"Water Bucket","Frost Grenade","Banana Gun","Frost Blower","Carrot Launcher"}
-    local seedList = {"Cactus Seed","Strawberry Seed","Pumpkin Seed","Sunflower Seed","Dragon Seed","Eggplant Seed","Watermelon Seed","Grape Seed","Cocotank Seed","Carnivorous Plant Seed","Mr Carrot Seed","Tomatrio Seed","Shroombino Seed"}
+local brainButton = brainTab:CreateButton({Name = "Equip Best Brainrot", Callback = equipBestBrainrot})
+local brainInput = brainTab:CreateInput({
+	Name = "Auto Collect Delay (seconds)",
+	PlaceholderText = tostring(autoBrainrotDelay),
+	Callback = function(value)
+		local num = tonumber(value)
+		if num and num > 0 then autoBrainrotDelay = num end
+	end
+})
 
-    local selectedGears, selectedSeeds = {}, {}
-    local autoBuyGears, autoBuySeeds = false, false
-    local autoBuyAllGears, autoBuyAllSeeds = false, false
-    local gearDelay, seedDelay = 1, 1
-    local autoBestBrainrot, autoBrainrotDelay = false, 60
+local brainToggle = brainTab:CreateToggle({
+	Name = "Auto Equip Best Brainrot",
+	CurrentValue = autoBestBrainrot,
+	Callback = function(state)
+		autoBestBrainrot = state
+		task.spawn(function()
+			while autoBestBrainrot do
+				equipBestBrainrot()
+				task.wait(autoBrainrotDelay)
+			end
+		end)
+	end
+})
 
-    -- helper remotes firing that checks existance
-    local function buyGear(item)
-        if not BuyGearRemote then
-            safe_print("BuyGear remote missing; cannot buy:", item)
-            return
-        end
-        pcall(function() BuyGearRemote:FireServer(item) end)
-    end
-    local function buySeed(item)
-        if not BuyItemRemote then
-            safe_print("BuyItem remote missing; cannot buy:", item)
-            return
-        end
-        pcall(function() BuyItemRemote:FireServer(item) end)
-    end
-    local function equipBestBrainrot()
-        if not EquipBestBrainrotRemote then
-            safe_print("EquipBestBrainrots remote missing; cannot equip best brainrot.")
-            return
-        end
-        pcall(function() EquipBestBrainrotRemote:FireServer() end)
-    end
+-- 🧍 Local Tab
+local localTab = Window:CreateTab({Name = "🧍 Local", Icon = "user"})
+localTab:CreateDivider()
 
-    -- Anti-AFK
-    pcall(function()
-        LocalPlayer.Idled:Connect(function()
-            VirtualUser:CaptureController()
-            VirtualUser:ClickButton2(Vector2.new())
-        end)
-    end)
+local usernameLabel = localTab:CreateLabel({Text = "Username: Loading..."})
+local displayNameLabel = localTab:CreateLabel({Text = "DisplayName: Loading..."})
+local userIdLabel = localTab:CreateLabel({Text = "UserId: Loading..."})
 
-    -- UI: Gears Tab
-    local gearTab = Window:Tab({Title = "🌟 Gears", Icon = "tool"})
-    gearTab:Paragraph({Title = "Gear Shop", Desc = "Select gears and choose how to buy them."})
+local function updateLocalInfo()
+	usernameLabel:SetText("Username: " .. LocalPlayer.Name)
+	displayNameLabel:SetText("DisplayName: " .. LocalPlayer.DisplayName)
+	userIdLabel:SetText("UserId: " .. LocalPlayer.UserId)
+end
 
-    gearTab:Dropdown({
-        Title = "Select Gears",
-        Values = gearList,
-        Multi = true,
-        AllowNone = true,
-        Callback = function(option) selectedGears = option end
-    })
+updateLocalInfo()
+LocalPlayer:GetPropertyChangedSignal("DisplayName"):Connect(updateLocalInfo)
 
-    gearTab:Input({
-        Title = "Gear Buy Delay (seconds)",
-        Value = "1",
-        Callback = function(input)
-            local num = tonumber(input)
-            if num and num > 0 then gearDelay = num end
-        end
-    })
+local discordButton = localTab:CreateButton({
+	Name = "Copy Discord",
+	Callback = function()
+		if safe_set_clipboard("https://dsc.gg/9e9V648aGq") then
+			Luna:Notification({Title = "Legitxwx Hub", Content = "Discord link copied!"})
+		else
+			warn("Clipboard failed")
+			print("Discord link:", "https://dsc.gg/9e9V648aGq")
+		end
+	end
+})
 
-    gearTab:Toggle({
-        Title = "Auto Buy Selected Gears",
-        Default = false,
-        Callback = function(state)
-            autoBuyGears = state
-            task.spawn(function()
-                while autoBuyGears do
-                    for _, gear in ipairs(selectedGears) do
-                        if not autoBuyGears then break end
-                        buyGear(gear)
-                        task.wait(gearDelay)
-                    end
-                    task.wait(0.25)
-                end
-            end)
-        end
-    })
-
-    gearTab:Toggle({
-        Title = "Auto Buy ALL Gears",
-        Default = false,
-        Callback = function(state)
-            autoBuyAllGears = state
-            task.spawn(function()
-                while autoBuyAllGears do
-                    for _, gear in ipairs(gearList) do
-                        if not autoBuyAllGears then break end
-                        buyGear(gear)
-                        task.wait(gearDelay)
-                    end
-                    task.wait(0.25)
-                end
-            end)
-        end
-    })
-
-    -- Seeds Tab
-    local seedTab = Window:Tab({Title = "🌱 Seeds", Icon = "leaf"})
-    seedTab:Paragraph({Title = "Seed Shop", Desc = "Select seeds and choose how to buy them."})
-
-    seedTab:Dropdown({
-        Title = "Select Seeds",
-        Values = seedList,
-        Multi = true,
-        AllowNone = true,
-        Callback = function(option) selectedSeeds = option end
-    })
-
-    seedTab:Input({
-        Title = "Seed Buy Delay (seconds)",
-        Value = "1",
-        Callback = function(input)
-            local num = tonumber(input)
-            if num and num > 0 then seedDelay = num end
-        end
-    })
-
-    seedTab:Toggle({
-        Title = "Auto Buy Selected Seeds",
-        Default = false,
-        Callback = function(state)
-            autoBuySeeds = state
-            task.spawn(function()
-                while autoBuySeeds do
-                    for _, seed in ipairs(selectedSeeds) do
-                        if not autoBuySeeds then break end
-                        buySeed(seed)
-                        task.wait(seedDelay)
-                    end
-                    task.wait(0.25)
-                end
-            end)
-        end
-    })
-
-    seedTab:Toggle({
-        Title = "Auto Buy ALL Seeds",
-        Default = false,
-        Callback = function(state)
-            autoBuyAllSeeds = state
-            task.spawn(function()
-                while autoBuyAllSeeds do
-                    for _, seed in ipairs(seedList) do
-                        if not autoBuyAllSeeds then break end
-                        buySeed(seed)
-                        task.wait(seedDelay)
-                    end
-                    task.wait(0.25)
-                end
-            end)
-        end
-    })
-
-    -- Brainrots Tab
-    local brainTab = Window:Tab({Title = "🧠 Brainrots", Icon = "brain"})
-    brainTab:Paragraph({Title = "Brainrot Auto", Desc = "Equip the best brainrot automatically or manually."})
-
-    brainTab:Button({Title = "Equip Best Brainrot", Callback = function() equipBestBrainrot() end})
-
-    brainTab:Input({
-        Title = "Auto Collect Delay (seconds)",
-        Value = "60",
-        Callback = function(input)
-            local num = tonumber(input)
-            if num and num > 0 then autoBrainrotDelay = num end
-        end
-    })
-
-    brainTab:Toggle({
-        Title = "Auto Equip Best Brainrot",
-        Default = false,
-        Callback = function(state)
-            autoBestBrainrot = state
-            task.spawn(function()
-                while autoBestBrainrot do
-                    equipBestBrainrot()
-                    task.wait(autoBrainrotDelay)
-                end
-            end)
-        end
-    })
-
-    -- Local Tab
-    local localTab = Window:Tab({Title = "🧍 Local", Icon = "user"})
-    localTab:Paragraph({Title = "Player Info", Desc = "Your Roblox account information:"})
-    localTab:Label({Text = "Username: " .. (LocalPlayer and LocalPlayer.Name or "Unknown")})
-    localTab:Label({Text = "DisplayName: " .. (LocalPlayer and LocalPlayer.DisplayName or "Unknown")})
-    localTab:Label({Text = "UserId: " .. (LocalPlayer and tostring(LocalPlayer.UserId) or "Unknown")})
-
-    localTab:Paragraph({Title = "Discord", Desc = "Copy the official Discord server link."})
-    localTab:Button({
-        Title = "Copy Discord",
-        Callback = function()
-            local ok, err = safe_set_clipboard("https://dsc.gg/9e9V648aGq")
-            if ok then
-                notify("Legitxwx Hub", "Discord link copied!", 2)
-            else
-                warn("Clipboard failed:", err)
-                print("Discord link:", "https://dsc.gg/9e9V648aGq")
-                notify("Legitxwx Hub", "Failed to copy. Link printed to console.", 3)
-            end
-        end
-    })
-
-    -- Update log
-    local UPD = Window:Tab({Title = "UPD LOG", Icon = "scroll"})
-    UPD:Code({
-        Title = "Update Log",
-        Code = [[
+-- 📜 Update Log Tab
+local UPD = Window:CreateTab({Name = "UPD LOG", Icon = "scroll"})
+UPD:CreateDivider()
+UPD:CreateParagraph({Title = "Update Log", Text = [[
 v1.1.0:
-- Added Auto Buy ALL option for Gears & Seeds
-- Fixed Brainrot auto-equip loop
-- Improved FPS unlock notification
-- Local tab fully functional with Discord copy fallback
+- Auto Buy ALL option for Gears & Seeds
+- Brainrot auto-equip loop fixed
+- FPS unlock notification
+- Local tab dynamic with live info
 - Anti-AFK included
-- Script robust for multiple executors and provides debug output on failure
-]]
-    })
+- Config system fully integrated for ALL tabs
+]]})
 
-    notify("Legitxwx Hub", "Loaded successfully. Check console for details.", 3)
-    safe_print("Legitxwx: Loaded OK")
-end
+-- ✅ Build Config Section for all tabs
+gearTab:BuildConfigSection()
+seedTab:BuildConfigSection()
+brainTab:BuildConfigSection()
+localTab:BuildConfigSection()
 
--- run protected and show error if any
-local ok, err = xpcall(main, debug.traceback)
-if not ok then
-    notify("Legitxwx Hub - Error", "Script failed to run. Check console for details.", 8)
-    safe_print("Legitxwx startup error:", err)
-end
+-- Notification on load
+Luna:Notification({Title = "Legitxwx Hub", Content = "Loaded successfully with full config!"})
