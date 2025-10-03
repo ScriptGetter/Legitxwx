@@ -86,7 +86,7 @@ end)
 local gearTab = Window:Tab({Title = "🌟 Gears", Icon = "tool"})
 gearTab:Paragraph({Title = "Gear Shop", Desc = "Select gears and choose how to buy them."})
 
-gearTab:Dropdown({
+local gearDropdown = gearTab:Dropdown({
     Title = "Select Gears",
     Values = gearList,
     Multi = true,
@@ -94,7 +94,7 @@ gearTab:Dropdown({
     Callback = function(option) selectedGears = option end
 })
 
-gearTab:Input({
+local gearInput = gearTab:Input({
     Title = "Gear Buy Delay (seconds)",
     Value = "1",
     Callback = function(input) 
@@ -103,7 +103,7 @@ gearTab:Input({
     end
 })
 
-gearTab:Toggle({
+local autoSelectedGearsToggle = gearTab:Toggle({
     Title = "Auto Buy Selected Gears",
     Default = false,
     Callback = function(state)
@@ -121,7 +121,7 @@ gearTab:Toggle({
     end
 })
 
-gearTab:Toggle({
+local autoAllGearsToggle = gearTab:Toggle({
     Title = "Auto Buy ALL Gears",
     Default = false,
     Callback = function(state)
@@ -143,7 +143,7 @@ gearTab:Toggle({
 local seedTab = Window:Tab({Title = "🌱 Seeds", Icon = "leaf"})
 seedTab:Paragraph({Title = "Seed Shop", Desc = "Select seeds and choose how to buy them."})
 
-seedTab:Dropdown({
+local seedDropdown = seedTab:Dropdown({
     Title = "Select Seeds",
     Values = seedList,
     Multi = true,
@@ -151,7 +151,7 @@ seedTab:Dropdown({
     Callback = function(option) selectedSeeds = option end
 })
 
-seedTab:Input({
+local seedInput = seedTab:Input({
     Title = "Seed Buy Delay (seconds)",
     Value = "1",
     Callback = function(input)
@@ -160,7 +160,7 @@ seedTab:Input({
     end
 })
 
-seedTab:Toggle({
+local autoSelectedSeedsToggle = seedTab:Toggle({
     Title = "Auto Buy Selected Seeds",
     Default = false,
     Callback = function(state)
@@ -178,7 +178,7 @@ seedTab:Toggle({
     end
 })
 
-seedTab:Toggle({
+local autoAllSeedsToggle = seedTab:Toggle({
     Title = "Auto Buy ALL Seeds",
     Default = false,
     Callback = function(state)
@@ -202,7 +202,7 @@ brainTab:Paragraph({Title = "Brainrot Auto", Desc = "Equip the best brainrot aut
 
 brainTab:Button({Title = "Equip Best Brainrot", Callback = function() equipBestBrainrot() end})
 
-brainTab:Input({
+local brainInput = brainTab:Input({
     Title = "Auto Collect Delay (seconds)",
     Value = "60",
     Callback = function(input)
@@ -211,7 +211,7 @@ brainTab:Input({
     end
 })
 
-brainTab:Toggle({
+local autoBestBrainrotToggle = brainTab:Toggle({
     Title = "Auto Equip Best Brainrot",
     Default = false,
     Callback = function(state)
@@ -225,13 +225,25 @@ brainTab:Toggle({
     end
 })
 
--- Config System
+-- ⚙️ Config Tab
+local configTab = Window:Tab({Title = "⚙️ Config", Icon = "gear"})
+
 local ConfigManager = Window.ConfigManager
 local myConfig = ConfigManager:CreateConfig("LegitxwxHub_Config")
-myConfig:Register("SelectedGears", selectedGears)
-myConfig:Register("SelectedSeeds", selectedSeeds)
-myConfig:Register("GearDelay", gearDelay)
-myConfig:Register("SeedDelay", seedDelay)
-myConfig:Register("AutoBestBrainrotDelay", autoBrainrotDelay)
-myConfig:Save()
+
+-- Register the **actual Elements**, not raw variables
+myConfig:Register("SelectedGears", gearDropdown)
+myConfig:Register("GearDelay", gearInput)
+myConfig:Register("AutoBuySelectedGears", autoSelectedGearsToggle)
+myConfig:Register("AutoBuyAllGears", autoAllGearsToggle)
+
+myConfig:Register("SelectedSeeds", seedDropdown)
+myConfig:Register("SeedDelay", seedInput)
+myConfig:Register("AutoBuySelectedSeeds", autoSelectedSeedsToggle)
+myConfig:Register("AutoBuyAllSeeds", autoAllSeedsToggle)
+
+myConfig:Register("AutoBestBrainrotDelay", brainInput)
+myConfig:Register("AutoEquipBestBrainrot", autoBestBrainrotToggle)
+
+-- Load saved config on script start
 myConfig:Load()
