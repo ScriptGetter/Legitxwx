@@ -6,7 +6,7 @@ local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-S
 -- Window
 local Window = Luna:CreateWindow({
 	Name = "Legitxwx Hub",
-	Subtitle = "v1.1.0",
+	Subtitle = "v1.12.0",
 	LogoID = nil,
 	LoadingEnabled = true,
 	LoadingTitle = "Legitxwx Hub",
