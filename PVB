@@ -1,4 +1,4 @@
--- Legitxwx Hub | Luna Version with Full Config
+-- Legitxwx Hub | Luna Version Fully Fixed
 repeat task.wait() until game:IsLoaded()
 
 -- FPS Unlock
@@ -23,7 +23,7 @@ end
 local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua", true))()
 
 local Window = Luna:CreateWindow({
-	Name = "Legitxwx Hub | v1.1.f0",
+	Name = "Legitxwx Hub | v1.1.0",
 	Subtitle = "Plants vs Brainrots Automation",
 	LogoID = "82795327169782",
 	LoadingEnabled = true,
@@ -33,7 +33,7 @@ local Window = Luna:CreateWindow({
 	KeySystem = false
 })
 
--- Services & Player
+-- Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
@@ -259,11 +259,12 @@ v1.1.0:
 - Config system fully integrated for ALL tabs
 ]]})
 
--- ✅ Build Config Section for all tabs
+-- ✅ Build Config Sections for ALL tabs
 gearTab:BuildConfigSection()
 seedTab:BuildConfigSection()
 brainTab:BuildConfigSection()
 localTab:BuildConfigSection()
+UPD:BuildConfigSection()
 
 -- Notification on load
 Luna:Notification({Title = "Legitxwx Hub", Content = "Loaded successfully with full config!"})
