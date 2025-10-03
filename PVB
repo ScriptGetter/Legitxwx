@@ -1,77 +1,245 @@
-local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua"))()
+repeat task.wait() until game:IsLoaded()
 
-local Window = Luna:CreateWindow({
+-- FPS Unlock
+if setfpscap then
+	setfpscap(1000000)
+	game:GetService("StarterGui"):SetCore("SendNotification", {
+		Title = "Legitxwx Hub",
+		Text = "FPS Unlocked!",
+		Duration = 2
+	})
+else
+	game:GetService("StarterGui"):SetCore("SendNotification", {
+		Title = "Legitxwx Hub",
+		Text = "Your exploit does not support setfpscap.",
+		Duration = 2
+	})
+end
+
+-- Load Rayfield (Official Sirius)
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- Create Window
+local Window = Rayfield:CreateWindow({
 	Name = "Legitxwx Hub | v1.1.0",
-	Subtitle = "Plants vs Brainrots",
-	LogoID = "82795327169782",
-	LoadingEnabled = true,
 	LoadingTitle = "Legitxwx Hub",
 	LoadingSubtitle = "by xwx",
-	ConfigSettings = {ConfigFolder = "LegitxwxHub"},
-	KeySystem = false
+	ConfigurationSaving = {
+		Enabled = true,
+		FolderName = "LegitxwxHub",
+		FileName = "Config"
+	}
 })
 
--- Create Home Tab FIRST
-Window:CreateHomeTab({
-	SupportedExecutors = {},
-	DiscordInvite = "9e9V648aGq",
-	Icon = 1
-})
+-- Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local VirtualUser = game:GetService("VirtualUser")
+
+-- Anti-AFK
+LocalPlayer.Idled:Connect(function()
+	VirtualUser:CaptureController()
+	VirtualUser:ClickButton2(Vector2.new())
+end)
+
+-- Remotes
+local RemotesParent = ReplicatedStorage:WaitForChild("Remotes")
+local BuyGearRemote = RemotesParent:WaitForChild("BuyGear")
+local BuyItemRemote = RemotesParent:WaitForChild("BuyItem")
+local EquipBestBrainrotRemote = RemotesParent:WaitForChild("EquipBestBrainrots")
+
+-- Lists
+local gearList = {"Water Bucket","Frost Grenade","Banana Gun","Frost Blower","Carrot Launcher"}
+local seedList = {"Cactus Seed","Strawberry Seed","Pumpkin Seed","Sunflower Seed","Dragon Seed","Eggplant Seed","Watermelon Seed","Grape Seed","Cocotank Seed","Carnivorous Plant Seed","Mr Carrot Seed","Tomatrio Seed","Shroombino Seed"}
+
+-- Variables
+local selectedGears, selectedSeeds = {}, {}
+local autoBuyGears, autoBuySeeds = false, false
+local autoBuyAllGears, autoBuyAllSeeds = false, false
+local gearDelay, seedDelay = 1, 1
+local autoBestBrainrot, autoBrainrotDelay = 60, false
+
+-- Helper functions
+local function buyGear(item) pcall(function() BuyGearRemote:FireServer(item) end) end
+local function buySeed(item) pcall(function() BuyItemRemote:FireServer(item) end) end
+local function equipBestBrainrot() pcall(function() EquipBestBrainrotRemote:FireServer() end) end
 
 -- 🌟 Gears Tab
-local gearTab = Window:CreateTab({Name = "🌟 Gears", Icon = "tool"})
-gearTab:CreateParagraph({Title = "Gear Shop", Text = "Select gears and toggles will work here."})
-local gearToggle = gearTab:CreateToggle({
-	Name = "Auto Buy Gears",
-	CurrentValue = false,
-	Callback = function(state)
-		print("Auto Buy Gears:", state)
+local gearTab = Window:CreateTab("🌟 Gears")
+gearTab:Paragraph({Title = "Gear Shop", Desc = "Select gears and auto-buy options."})
+
+gearTab:Dropdown({
+	Title = "Select Gears",
+	Values = gearList,
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option) selectedGears = option end
+})
+
+gearTab:Input({
+	Title = "Gear Buy Delay (seconds)",
+	Value = "1",
+	Callback = function(input)
+		local num = tonumber(input)
+		if num and num > 0 then gearDelay = num end
 	end
 })
+
+gearTab:Toggle({
+	Title = "Auto Buy Selected Gears",
+	Default = false,
+	Callback = function(state)
+		autoBuyGears = state
+		task.spawn(function()
+			while autoBuyGears do
+				for _, gear in ipairs(selectedGears) do
+					if not autoBuyGears then break end
+					buyGear(gear)
+					task.wait(gearDelay)
+				end
+				task.wait(0.25)
+			end
+		end)
+	end
+})
+
+gearTab:Toggle({
+	Title = "Auto Buy ALL Gears",
+	Default = false,
+	Callback = function(state)
+		autoBuyAllGears = state
+		task.spawn(function()
+			while autoBuyAllGears do
+				for _, gear in ipairs(gearList) do
+					if not autoBuyAllGears then break end
+					buyGear(gear)
+					task.wait(gearDelay)
+				end
+				task.wait(0.25)
+			end
+		end)
+	end
+})
+
 gearTab:BuildConfigSection()
 
 -- 🌱 Seeds Tab
-local seedTab = Window:CreateTab({Name = "🌱 Seeds", Icon = "leaf"})
-seedTab:CreateParagraph({Title = "Seed Shop", Text = "Select seeds and toggles will work here."})
-local seedToggle = seedTab:CreateToggle({
-	Name = "Auto Buy Seeds",
-	CurrentValue = false,
-	Callback = function(state)
-		print("Auto Buy Seeds:", state)
+local seedTab = Window:CreateTab("🌱 Seeds")
+seedTab:Paragraph({Title = "Seed Shop", Desc = "Select seeds and auto-buy options."})
+
+seedTab:Dropdown({
+	Title = "Select Seeds",
+	Values = seedList,
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option) selectedSeeds = option end
+})
+
+seedTab:Input({
+	Title = "Seed Buy Delay (seconds)",
+	Value = "1",
+	Callback = function(input)
+		local num = tonumber(input)
+		if num and num > 0 then seedDelay = num end
 	end
 })
+
+seedTab:Toggle({
+	Title = "Auto Buy Selected Seeds",
+	Default = false,
+	Callback = function(state)
+		autoBuySeeds = state
+		task.spawn(function()
+			while autoBuySeeds do
+				for _, seed in ipairs(selectedSeeds) do
+					if not autoBuySeeds then break end
+					buySeed(seed)
+					task.wait(seedDelay)
+				end
+				task.wait(0.25)
+			end
+		end)
+	end
+})
+
+seedTab:Toggle({
+	Title = "Auto Buy ALL Seeds",
+	Default = false,
+	Callback = function(state)
+		autoBuyAllSeeds = state
+		task.spawn(function()
+			while autoBuyAllSeeds do
+				for _, seed in ipairs(seedList) do
+					if not autoBuyAllSeeds then break end
+					buySeed(seed)
+					task.wait(seedDelay)
+				end
+				task.wait(0.25)
+			end
+		end)
+	end
+})
+
 seedTab:BuildConfigSection()
 
 -- 🧠 Brainrots Tab
-local brainTab = Window:CreateTab({Name = "🧠 Brainrots", Icon = "brain"})
-brainTab:CreateParagraph({Title = "Brainrots", Text = "Auto Equip Brainrots"})
-local brainToggle = brainTab:CreateToggle({
-	Name = "Auto Equip Brainrots",
-	CurrentValue = false,
-	Callback = function(state)
-		print("Auto Equip Brainrots:", state)
+local brainTab = Window:CreateTab("🧠 Brainrots")
+brainTab:Paragraph({Title = "Brainrot Auto", Desc = "Equip the best brainrot automatically or manually."})
+
+brainTab:Button({Title = "Equip Best Brainrot", Callback = equipBestBrainrot})
+
+brainTab:Input({
+	Title = "Auto Collect Delay (seconds)",
+	Value = "60",
+	Callback = function(input)
+		local num = tonumber(input)
+		if num and num > 0 then autoBrainrotDelay = num end
 	end
 })
+
+brainTab:Toggle({
+	Title = "Auto Equip Best Brainrot",
+	Default = false,
+	Callback = function(state)
+		autoBestBrainrot = state
+		task.spawn(function()
+			while autoBestBrainrot do
+				equipBestBrainrot()
+				task.wait(autoBrainrotDelay)
+			end
+		end)
+	end
+})
+
 brainTab:BuildConfigSection()
 
 -- 🧍 Local Tab
-local localTab = Window:CreateTab({Name = "🧍 Local", Icon = "user"})
-localTab:CreateParagraph({Title = "Player Info", Text = "Username: "..game.Players.LocalPlayer.Name})
-localTab:CreateButton({
-	Name = "Copy Discord",
+local localTab = Window:CreateTab("🧍 Local")
+localTab:Paragraph({Title = "Player Info", Desc = "Your Roblox account information:"})
+localTab:Label({Text = "Username: "..LocalPlayer.Name})
+localTab:Label({Text = "DisplayName: "..LocalPlayer.DisplayName})
+localTab:Label({Text = "UserId: "..LocalPlayer.UserId})
+
+localTab:Paragraph({Title = "Discord", Desc = "Copy the official Discord server link."})
+localTab:Button({
+	Title = "Copy Discord",
 	Callback = function()
 		if setclipboard then setclipboard("https://dsc.gg/9e9V648aGq") end
 	end
 })
+
 localTab:BuildConfigSection()
 
 -- 📜 Update Log Tab
-local updTab = Window:CreateTab({Name = "UPD LOG", Icon = "scroll"})
-updTab:CreateParagraph({Title = "Update Log", Text = [[
+local updTab = Window:CreateTab("UPD LOG")
+updTab:Paragraph({Title = "Update Log", Desc = [[
 v1.1.0:
-- Fixed tabs showing
-- Full config saving
-- Local tab working
+- Auto Buy ALL option for Gears & Seeds
+- Brainrot auto-equip loop fixed
 - FPS unlock notification
+- Local tab dynamic with live info
+- Anti-AFK included
+- Config system fully integrated
 ]]})
 updTab:BuildConfigSection()
