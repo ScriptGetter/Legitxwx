@@ -208,6 +208,144 @@ brainTab:Toggle({
             end
         end)
     end
+})
+gearTab:Dropdown({
+    Title = "Select Gears",
+    Values = gearList,
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option) selectedGears = option end
+})
+
+gearTab:Input({
+    Title = "Gear Buy Delay (seconds)",
+    Value = "1",
+    Callback = function(input) 
+        local num = tonumber(input)
+        if num and num > 0 then gearDelay = num end
+    end
+})
+
+gearTab:Toggle({
+    Title = "Auto Buy Selected Gears",
+    Default = false,
+    Callback = function(state)
+        autoBuyGears = state
+        task.spawn(function()
+            while autoBuyGears do
+                for _, gear in ipairs(selectedGears) do
+                    if not autoBuyGears then break end
+                    buyGear(gear)
+                    task.wait(gearDelay)
+                end
+                task.wait(3)
+            end
+        end)
+    end
+})
+
+gearTab:Toggle({
+    Title = "Auto Buy ALL Gears",
+    Default = false,
+    Callback = function(state)
+        autoBuyAllGears = state
+        task.spawn(function()
+            while autoBuyAllGears do
+                for _, gear in ipairs(gearList) do
+                    if not autoBuyAllGears then break end
+                    buyGear(gear)
+                    task.wait(gearDelay)
+                end
+                task.wait(3)
+            end
+        end)
+    end
+})
+
+-- ðŸŒ± Seeds Tab
+local seedTab = Window:Tab({Title = "ðŸŒ± Seeds", Icon = "leaf"})
+seedTab:Paragraph({Title = "Seed Shop", Desc = "Select seeds and choose how to buy them."})
+
+seedTab:Dropdown({
+    Title = "Select Seeds",
+    Values = seedList,
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option) selectedSeeds = option end
+})
+
+seedTab:Input({
+    Title = "Seed Buy Delay (seconds)",
+    Value = "1",
+    Callback = function(input)
+        local num = tonumber(input)
+        if num and num > 0 then seedDelay = num end
+    end
+})
+
+seedTab:Toggle({
+    Title = "Auto Buy Selected Seeds",
+    Default = false,
+    Callback = function(state)
+        autoBuySeeds = state
+        task.spawn(function()
+            while autoBuySeeds do
+                for _, seed in ipairs(selectedSeeds) do
+                    if not autoBuySeeds then break end
+                    buySeed(seed)
+                    task.wait(seedDelay)
+                end
+                task.wait(3)
+            end
+        end)
+    end
+})
+
+seedTab:Toggle({
+    Title = "Auto Buy ALL Seeds",
+    Default = false,
+    Callback = function(state)
+        autoBuyAllSeeds = state
+        task.spawn(function()
+            while autoBuyAllSeeds do
+                for _, seed in ipairs(seedList) do
+                    if not autoBuyAllSeeds then break end
+                    buySeed(seed)
+                    task.wait(seedDelay)
+                end
+                task.wait(3)
+            end
+        end)
+    end
+})
+
+-- ðŸ§  Brainrots Tab
+local brainTab = Window:Tab({Title = "ðŸ§  Brainrots", Icon = "brain"})
+brainTab:Paragraph({Title = "Brainrot Auto", Desc = "Equip the best brainrot automatically or manually."})
+
+brainTab:Button({Title = "Equip Best Brainrot", Callback = function() equipBestBrainrot() end})
+
+brainTab:Input({
+    Title = "Auto Collect Delay (seconds)",
+    Value = "60",
+    Callback = function(input)
+        local num = tonumber(input)
+        if num and num > 0 then autoBrainrotDelay = num end
+    end
+})
+
+brainTab:Toggle({
+    Title = "Auto Equip Best Brainrot",
+    Default = false,
+    Callback = function(state)
+        autoBestBrainrot = state
+        task.spawn(function()
+            while autoBestBrainrot do
+                equipBestBrainrot()
+                task.wait(autoBrainrotDelay)
+            end
+        end)
+    end
 })    local gearDelayInput = gearTab:CreateInput({
         Name = "Gear Buy Delay",
         PlaceholderText = "Enter delay in seconds",
