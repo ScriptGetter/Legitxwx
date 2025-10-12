@@ -45,7 +45,7 @@ local EquipBestBrainrotRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitFo
 
 -- 📋 Lists
 local gearList = {"Water Bucket","Frost Grenade","Banana Gun","Frost Blower","Carrot Launcher"}
-local seedList = {"Cactus Seed","Strawberry Seed","Pumpkin Seed","Sunflower Seed","Dragon Seed","Eggplant Seed","Watermelon Seed","Grape Seed","Cocotank Seed","Carnivorous Plant Seed","Mr Carrot Seed","Tomatrio Seed","Shroombino Seed","Mango Seed"}
+local seedList = {"Cactus Seed","Strawberry Seed","Pumpkin Seed","Sunflower Seed","Dragon Seed","Eggplant Seed","Watermelon Seed","Grape Seed","Cocotank Seed","Carnivorous Plant Seed","Mr Carrot Seed","Tomatrio Seed","Shroombino Seed","Mango Seed","King Limone Seed"}
 
 -- ⚙️ Variables
 local selectedGears, selectedSeeds = {}, {}
