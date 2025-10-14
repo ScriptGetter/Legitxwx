@@ -23,7 +23,7 @@ end
 -- 🌌 Load WindUI v6
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Window = WindUI:CreateWindow({
-    Title = "Legitxwx Hub | v1.1.7",
+    Title = "Legitxwx Hub | v1.1.8",
     Icon = "door-open",
     Author = "by xwx",
     Folder = "LegitxwxHub",
@@ -145,7 +145,7 @@ seedTab:Input({
 })
 
 seedTab:Toggle({
-    Title = "⚡ Auto Buy Selected Seeds (Fast Mode)",
+    Title = "Auto Buy Selected Seeds",
     Default = false,
     Callback = function(state)
         autoBuySeeds = state
@@ -163,7 +163,7 @@ seedTab:Toggle({
 })
 
 seedTab:Toggle({
-    Title = "⚡ Auto Buy ALL Seeds (Ultra Fast)",
+    Title = "⚡ Auto Buy ALL Seeds",
     Default = false,
     Callback = function(state)
         autoBuyAllSeeds = state
@@ -181,8 +181,7 @@ seedTab:Toggle({
 })
 
 -- 🧠 Brainrots Tab
-local brainTab = Window:Tab({Title = " Brainrots", Icon = "brain"})
-brainTab:Paragraph({Title = "Brainrot Auto", Desc = "Equip the best brainrot automatically or manually."})
+local brainTab = Window:Tab({Title = " Automatic", Icon = "brain"})
 
 brainTab:Button({
     Title = "Equip Best Brainrot",
